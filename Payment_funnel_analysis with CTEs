@@ -1,0 +1,42 @@
+Payment funnel analysis with CTEs
+
+Code for calculating different statusnames for different combinations
+
+/*
+case when maxstatus = 1 then 'PaymentWidgetOpened'
+		when maxstatus = 2 then 'PaymentEntered'
+		when maxstatus = 3 and currentstatus = 0 then 'User Error with Payment Submission'
+		when maxstatus = 3 and currentstatus != 0 then 'Payment Submitted'
+		when maxstatus = 4 and currentstatus = 0 then 'Payment Processing Error with Vendor'
+		when maxstatus = 4 and currentstatus != 0 then 'Payment Success'
+		when maxstatus = 5 then 'Complete'
+		when maxstatus is null then 'User did not start payment process'
+		end as paymentfunnelstage
+*/ 
+
+--find maximum stage reached per subscription
+
+WITH maxstatusreached as(
+select MAX(statusID) as maxstatus, SubscriptionID
+from PaymentStatusLog
+group by subscriptionID) , 
+
+paymentfunnelstages as (select s.subscriptionID,
+		case when maxstatus = 1 then 'PaymentWidgetOpened'
+		when maxstatus = 2 then 'PaymentEntered'
+		when maxstatus = 3 and currentstatus = 0 then 'User Error with Payment Submission'
+		when maxstatus = 3 and currentstatus != 0 then 'Payment Submitted'
+		when maxstatus = 4 and currentstatus = 0 then 'Payment Processing Error with Vendor'
+		when maxstatus = 4 and currentstatus != 0 then 'Payment Success'
+		when maxstatus = 5 then 'Complete'
+		when maxstatus is null then 'User did not start payment process'
+		end as paymentfunnelstage
+from subscriptions s 
+LEFT JOIN maxstatusreached msr
+ON s.subscriptionID = msr.subscriptionID)
+
+select count(subscriptionID) AS subscriptions,
+		paymentfunnelstage
+From paymentfunnelstages
+group by paymentfunnelstage;
+
