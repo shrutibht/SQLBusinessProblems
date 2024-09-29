@@ -1,0 +1,16 @@
+Calculate descriptive status using CTE's
+
+with totalsmonthly as (SELECT sum(s.revenue) AS total_revenue ,productname, date_trunc('month',orderdate) as monthly
+FROM subscriptions s 
+LEFT JOIN products p 
+ON s.productID = p.productID
+where orderdate between '2022-01-01' and '2022-12-31'
+GROUP BY date_trunc('month',orderdate), productname)
+
+select productname,
+        MIN(total_revenue) min_rev,
+        MAX(total_revenue) max_rev, 
+        AVG(total_revenue) avg_rev,
+        STDDEV(total_revenue)std_dev_rev 
+FROM totalsmonthly 
+group by productname;
