@@ -1,0 +1,10 @@
+--fIND -# link clicks by each user 
+
+with numberofclicks as (select count(*) AS num_link_clicks, userid
+FROM frontendeventlog
+where eventid = 5
+group by userid)
+
+select count(num_link_clicks) AS num_users, num_link_clicks 
+FROM numberofclicks
+group by num_link_clicks   
