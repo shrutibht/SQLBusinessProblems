@@ -1,0 +1,11 @@
+#find avergae number of users across products 
+
+--first find total users per subscriptionID
+
+with totalusers(select sum(users) As total_usersperID, customerID 
+FROM subscription
+GROUP BY customerID)
+
+select customerID, AVG(total_usersperID)
+FROM totalusers
+
